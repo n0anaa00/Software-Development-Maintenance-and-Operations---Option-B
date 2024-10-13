@@ -1,0 +1,10 @@
+
+Please choose one of the .py files to work on. Each one contains instructions on what to do, and what the output should look like.
+
+If there are any issues with these instructions, they're unclear, it doesn't work like that, you need more prameters, there is an error in main.py, etc. please copntact me as soon as possible over Discord so that I can look into it. Please do not edit main.py or other members' .py files yourself, as that can cause merging issues with GitHub.
+
+Currently the link to our dataset is not working. I added the document example_github_projects.txt as a placeholder for now, so that you can test your files.
+Also note that after each time you run the program you will have to manually delete all the subfolders within Outputs to prevent doubling of files. Maybe in the future I'll create a .bat or something to clear the outputs automatically. If one of you wants to do that, go ahead, but don't delete the .gitkeep
+
+	
+-Lacrivilho

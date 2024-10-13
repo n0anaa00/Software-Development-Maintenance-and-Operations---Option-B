@@ -1,0 +1,18 @@
+# Ignore all contents of Downloads and Outputs folders
+Downloads/*
+Outputs/*
+
+# But keep the folders themselves
+!Downloads/.gitkeep
+!Outputs/.gitkeep
+
+# Don't ignore any .py files
+!*.py
+
+# Ignore Python cache files
+__pycache__/
+*.py[cod]
+
+# Ignore system files
+.DS_Store
+Thumbs.db
