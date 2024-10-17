@@ -55,8 +55,7 @@ def calculate_and_collect_diff(project_dir, output_dir):
             commit_info["diff_content"] += f"+++ {modified_file.filename}\n"
             commit_info["diff_content"] += modified_file.diff + "\n"
 
-        diff_data.append(commit_info)
-        
+     
     
     print(f"Diff changes collected and saved to {os.path.join(output_dir, 'commit-diffs.json')}.")
 
