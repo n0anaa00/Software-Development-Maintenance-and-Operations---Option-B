@@ -1,5 +1,11 @@
 import json
+from pydriller import RepositoryMining
 import os
+
+
+
+
+
 
 def calculate_and_collect_diff(project_dir, output_dir):
     print("Calculating and collecting diff changes...")
@@ -28,6 +34,33 @@ def calculate_and_collect_diff(project_dir, output_dir):
             "diff_content": "Sample diff content"
         }
     ]
+
+     
+    for commit in RepositoryMining(project_dir).traverse_commits():
+        commit_info = {
+            "commit_hash": commit.hash,
+            "previous_commit_hash": commit.parents[0].hash if commit.parents else None,
+            "diff_stats": {
+                "files_changed": len(commit.modified_files),
+                "insertions": sum(file.added for file in commit.modified_files),
+                "deletions": sum(file.deleted for file in commit.modified_files)
+            },
+            "diff_content": ""
+        }
+
+
+
+    for modified_file in commit.modified_files:
+            commit_info["diff_content"] += f"--- {modified_file.filename}\n"
+            commit_info["diff_content"] += f"+++ {modified_file.filename}\n"
+            commit_info["diff_content"] += modified_file.diff + "\n"
+
+        diff_data.append(commit_info)
+        
+    
+    print(f"Diff changes collected and saved to {os.path.join(output_dir, 'commit-diffs.json')}.")
+
+
 
     with open(os.path.join(output_dir, 'commit-diffs.json'), 'w') as f:
         json.dump(diff_data, f, indent=2)
