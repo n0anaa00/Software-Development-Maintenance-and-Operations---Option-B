@@ -34,7 +34,7 @@ def create_output_directory(repo_name):
 
 def main():
     # Read GitHub project URLs from a file
-    with open('example_github_projects.txt', 'r') as f:
+    with open('sources.txt', 'r') as f:
         project_urls = f.read().splitlines()
 
     for project_url in project_urls:

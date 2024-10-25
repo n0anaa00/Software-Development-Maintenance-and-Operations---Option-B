@@ -1,0 +1,21 @@
+The following entries failed automatic link generation, they were added to sources.txt maually:
+(failed link -> manually identified link, the closest match I could find using google)
+
+https://github.com/apache/ant-master -> 			https://github.com/apache/ant
+https://github.com/apache/apache-daffodil -> 			https://github.com/apache/daffodil
+https://github.com/apache/apache-dolphinscheduler -> 		https://github.com/apache/dolphinscheduler
+https://github.com/apache/apache-ratis -> 			https://github.com/apache/ratis
+https://github.com/apache/jspwiki-builder -> 			https://github.com/apache/jspwiki
+https://github.com/apache/knox-gateway -> 			https://github.com/apache/knox
+https://github.com/apache/log4cxx -> 				https://github.com/apache/logging-log4cxx
+https://github.com/apache/milagro -> 				https://github.com/apache/incubator-milagro
+https://github.com/apache/org.apache.nemo:nemo-project -> 	https://github.com/apache/incubator-nemo
+https://github.com/apache/pdfbox-reactor -> 			https://github.com/apache/pdfbox
+https://github.com/apache/poi-parent -> 			https://github.com/apache/poi
+https://github.com/apache/roller-master ->			https://github.com/apache/roller
+
+
+https://github.com/apache/sling-org-apache-sling-contentparser-testutils
+https://github.com/apache/sling-org-apache-sling-jobs-it
+https://github.com/apache/sling-org-apache-sling-startupfilter
+	-> These last three links were working, despite the program putting them in here. Maybe some timeout issue, easier to just add them back manually than to start debugging.
