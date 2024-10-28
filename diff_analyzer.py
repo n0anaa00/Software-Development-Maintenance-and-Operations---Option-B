@@ -57,10 +57,18 @@ def calculate_and_collect_diff(project_dir, output_dir):
 
      
     
-    print(f"Diff changes collected and saved to {os.path.join(output_dir, 'commit-diffs.json')}.")
+   
+    diff_data.append(commit_info)
 
 
 
-    with open(os.path.join(output_dir, 'commit-diffs.json'), 'w') as f:
-        json.dump(diff_data, f, indent=2)
 
+    # Ensure output directory exists
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Write collected diff data to JSON file
+    output_file = os.path.join(output_dir, 'commit-diffs.json')
+    with open(output_file, 'w') as f:
+        json.dump(diff_data, f, indent=4)
+
+    print(f"Diff changes collected and saved to {output_file}.")
