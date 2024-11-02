@@ -1,74 +1,56 @@
-import json
 from pydriller import RepositoryMining
 import os
+import json
 
-
-
-
-
-
-def calculate_and_collect_diff(project_dir, output_dir):
-    print("Calculating and collecting diff changes...")
+def analyze_diff(repository_path):
     """
-    Calculate and collect the diff changes between detected commits and their previous commits.
-
-    Parameters:
-    - project_dir (str): Path to the cloned project directory
-    - output_dir (str): Path to the output directory for this repository
-
-    Output:
-    - Saves a JSON file named 'commit-diffs.json' in the output directory
-    """
-    # TODO: Implement diff analysis logic using pydriller
-
-    # Placeholder output
-    diff_data = [
-        {
-            "commit_hash": "abc123",
-            "previous_commit_hash": "def456",
-            "diff_stats": {
-                "files_changed": 3,
-                "insertions": 10,
-                "deletions": 5
-            },
-            "diff_content": "Sample diff content"
-        }
-    ]
-
-     
-    for commit in RepositoryMining(project_dir).traverse_commits():
-        commit_info = {
-            "commit_hash": commit.hash,
-            "previous_commit_hash": commit.parents[0].hash if commit.parents else None,
-            "diff_stats": {
-                "files_changed": len(commit.modified_files),
-                "insertions": sum(file.added for file in commit.modified_files),
-                "deletions": sum(file.deleted for file in commit.modified_files)
-            },
-            "diff_content": ""
-        }
-
-
-
-    for modified_file in commit.modified_files:
-            commit_info["diff_content"] += f"--- {modified_file.filename}\n"
-            commit_info["diff_content"] += f"+++ {modified_file.filename}\n"
-            commit_info["diff_content"] += modified_file.diff + "\n"
-
-     
+    Analyzes the diff changes between each commit and its previous commit in a Git repository.
     
-   
-    diff_data.append(commit_info)
+    Args:
+        repository_path (str): The local path to the Git repository.
 
+    Returns:
+        List[Dict]: A list of dictionaries, each containing information about the diff change per commit.
+    """
+    diffs = []
 
+    for commit in RepositoryMining(repository_path).traverse_commits():
+        commit_info = {
+            "hash": commit.hash,
+            "author": commit.author.name,
+            "date": commit.committer_date,
+            "modified_files": []
+        }
+        
+        for modified_file in commit.modifications:
+            # Capture file-level changes like lines added and removed
+            file_diff = {
+                "filename": modified_file.filename,
+                "added_lines": modified_file.added_lines,
+                "deleted_lines": modified_file.deleted_lines,
+                "diff": modified_file.diff  # Optional: Full diff string
+            }
+            commit_info["modified_files"].append(file_diff)
+        
+        diffs.append(commit_info)
+    
+    return diffs
 
+def save_diff_to_file(diffs, output_file):
+    """
+    Saves the analyzed diff information to a file in JSON format.
 
-    "Ensure output directory exists"
-    os.makedirs(output_dir, exist_ok=True)
+    Args:
+        diffs (List[Dict]): List of diff information for each commit.
+        output_file (str): Path to the output file where results will be saved.
+    """
+    with open(output_file, 'w') as file:
+        json.dump(diffs, file, indent=4, default=str)
 
-    "Write collected diff data to JSON file"
-    output_file = os.path.join(output_dir, 'commit-diffs.json')
-    with open(output_file, 'w') as f:
-        json.dump(diff_data, f, indent=4)
-
-    print(f"Diff changes collected and saved to {output_file}.")
+# Example implementation:
+if __name__ == "__main__":
+    repo_path = "path/to/cloned/repository"
+    output_path = os.path.join(repo_path, "commit_diffs.json")
+    diff_data = analyze_diff(repo_path)
+    save_diff_to_file(diff_data, output_path)
+    print(f"Diff data saved to {output_path}")
