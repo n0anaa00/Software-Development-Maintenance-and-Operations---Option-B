@@ -1,5 +1,6 @@
 import csv
 import os
+import subprocess
 
 def collect_developers_effort(project_dir, output_dir):
     print("Collecting developers' effort...")
