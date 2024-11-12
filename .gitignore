@@ -19,3 +19,6 @@ Thumbs.db
 
 # Ignore the .csv database, which is too large and also unnecessary
 *.csv
+
+# Ignore RefactoringMiner folder
+RefactoringMiner-3.0.9/*
