@@ -171,5 +171,5 @@ def mine_multiple_projects_from_file(sources_file, output_dir, github_token):
 # Example usage:
 sources_file = "sources.txt"
 output_dir = "Outputs"
-github_token = "" # APPLY TOKEN HERE
+github_token = "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"
 mine_multiple_projects_from_file(sources_file, output_dir, github_token)
