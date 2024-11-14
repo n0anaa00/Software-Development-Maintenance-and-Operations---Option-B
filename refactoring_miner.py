@@ -2,28 +2,43 @@ import csv
 import json
 import os
 import subprocess
+from zipfile import ZipFile, ZIP_DEFLATED
 
 
 miner_dir = os.path.join("RefactoringMiner-3.0.9", "bin", "RefactoringMiner")
 
 
 def mine_refactoring_activity(project_dir, output_dir):
-    refactoring_data = {"Total Refactorings":0,"Time Between Refactorings":0, "Average Refactors per Refactoring Commit":0}
+
+    # Setting up the refactoring data
+    refactoring_data = {"Total Refactorings":0, "Average Number of Commits Between Refactorings":0, "Average Refactors per Refactoring Commit":0}
     commits_all = 0
     commits_refactoring = 0
+    
+
+    # Setting up the output file path variables
     json_output = os.path.join(output_dir, "rminer_output.json")
     csv_output = os.path.join(output_dir, "rminer_analysis.csv")
+    zip_output = os.path.join(output_dir, "rminer_output.zip")
     
+    
+    # Mining the repository
     try:
         print(f"Mining {project_dir}")
-        subprocess.run([miner_dir, "-a", project_dir, "-json", json_output])
+        if os.name == 'nt':  # Windows, attempting to guarantee the code working
+            subprocess.run(["RefactoringMiner", "-a", project_dir, "-json", json_output], shell=True)
+        else: # Linux
+            subprocess.run([miner_dir, "-a", project_dir, "-json", json_output])
     except subprocess.CalledProcessError as e:
         print(f"Error while mining {e}")
         raise
     
+
+    # Collecting statistics from the data
     with open(json_output, 'r') as json_data:
         miner_output = json.load(json_data)
     
+
     for commit in miner_output['commits']:
         commits_all += 1
         if commit['refactorings']:
@@ -35,11 +50,11 @@ def mine_refactoring_activity(project_dir, output_dir):
                     refactoring_data[refactor['type']] += 1
                 refactoring_data['Total Refactorings'] += 1
     
-    print(commits_all)
-    print(commits_refactoring)
-    refactoring_data['Time Between Refactorings'] = commits_all / commits_refactoring
+    refactoring_data['Average Number of Commits Between Refactorings'] = commits_all / commits_refactoring
     refactoring_data['Average Refactors per Refactoring Commit'] = refactoring_data['Total Refactorings'] / commits_refactoring
 
+
+    # Saving the statistics to a .csv file
     with open(csv_output, 'w', newline='') as output:
         csvwriter = csv.writer(output)
 
@@ -47,32 +62,20 @@ def mine_refactoring_activity(project_dir, output_dir):
             csvwriter.writerow([key, refactoring_data[key]])
 
 
-    """
-    Mine the refactoring activity applied in the history of the cloned projects.
+    # Compressing the RMiner output .json and deleting the .json to save space
+    with ZipFile(zip_output, 'w', ZIP_DEFLATED, compresslevel=9) as zip:
+        zip.write(json_output, "rminer_output.json")
 
-    Parameters:
-    - project_dir (str): Path to the cloned project directory
-    - output_dir (str): Path to the output directory for this repository
+    if os.path.exists(json_output):
+        os.remove(json_output)
+    else:
+        print(f"{json_output} does not exist, could not delete the file.")
 
-    Output:
-    - Saves a JSON file named 'rminer-output.json' in the output directory
-    
-    # TODO: Implement RefactoringMiner logic
-    # 1. Build and run RefactoringMiner tool
-    # 2. Parse the output
-    # 3. Calculate statistics
 
-    # Placeholder output
-    refactoring_data = {
-        "total_refactorings": {
-            "refactoring_type_1": 10,
-            "refactoring_type_2": 5,
-        },
-        "avg_inter_refactoring_period": 3.5
-    }
-"""
+
 
 if __name__ == "__main__":
+    # Code for testing purposes
     project = os.path.join("repository")
     output = os.path.join("Outputs", "ant")
     mine_refactoring_activity(project, output)
