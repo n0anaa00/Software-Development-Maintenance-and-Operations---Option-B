@@ -168,8 +168,9 @@ def mine_multiple_projects_from_file(sources_file, output_dir, github_token):
             print(f"Failed processing {url} due to {exc}")
 
 
-# Example usage:
-sources_file = "sources.txt"
-output_dir = "Outputs"
-github_token = "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"
-mine_multiple_projects_from_file(sources_file, output_dir, github_token)
+if __name__ == "__main__":
+    # Example usage:
+    sources_file = "sources.txt"
+    output_dir = "Outputs"
+    github_token = "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"
+    mine_multiple_projects_from_file(sources_file, output_dir, github_token)

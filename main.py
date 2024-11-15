@@ -8,7 +8,7 @@ import subprocess
 from refactoring_miner import mine_refactoring_activity
 from diff_analyzer import calculate_and_collect_diff
 from effort_collector import collect_developers_effort
-from bug_miner import mine_bug_fixing_commits
+from bug_miner import mine_bug_fixing_commits_api
 
 def clone_repository(repo_url, target_dir):
     print(f"Cloning repository: {repo_url}")
