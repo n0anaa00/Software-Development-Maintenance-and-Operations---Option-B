@@ -50,7 +50,7 @@ def main():
             mine_refactoring_activity(project_dir, output_dir)
             calculate_and_collect_diff(project_dir, output_dir)
             collect_developers_effort(project_dir, output_dir)
-            mine_bug_fixing_commits_api(project_url output_dir)
+            mine_bug_fixing_commits_api(project_url, output_dir)
 
         except Exception as e:
             print(f"An error occurred while processing {repo_name}: {str(e)}")
