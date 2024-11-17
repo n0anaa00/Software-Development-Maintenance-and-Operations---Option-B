@@ -1,1 +1,21 @@
 pydriller==2.6
+
+RefactoringMiner==3.0.9
+
+requests==2.32.3
+
+
+##############################################
+# RefactoringMiner setup instructions #
+##############################################
+# Linux
+# 1. Download RefactoringMiner-3.0.9 from https://github.com/tsantalis/RefactoringMiner/releases/tag/3.0.9
+# 2. Extract the folder into the project root directory, the structure should be project-root/RefactoringMiner-3.0.9/bin/
+# 3. The miner should be ready to go.
+#
+# Windows
+# 1. Download RefactoringMiner-3.0.9 from https://github.com/tsantalis/RefactoringMiner/releases/tag/3.0.9
+# 2. Extract RefactoringMiner-3.0.9 to as close to the root of the drive as possible, such as C:\tools\RefactoringMiner-3.0.9
+#    If the path is too long, there may be issues with running the miner from the command line.
+# 3. Add C:\path-to\RefactoringMiner-3.0.9\bin to the system PATH variable.
+# 4. The miner should be ready to go. Make sure to restart any IDE or terminals in order for the changes to the PATH to take effect.

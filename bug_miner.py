@@ -6,9 +6,9 @@ from time import sleep
 # GitHub and Jira API URLs
 jira_projects_url = "https://issues.apache.org/jira/rest/api/2/project"
 jira_issues_url = "https://issues.apache.org/jira/rest/api/2/search"
+# GITHUB_TOKEN = "YOUR GITHUB TOKEN HERE"
 
-
-def mine_bug_fixing_commits_api(project_url, output_dir, github_token):
+def mine_bug_fixing_commits_api(project_url, output_dir):
     """
     Attempt to mine bug-fixing commits from GitHub. If issues are not found, fall back to Jira.
     """
@@ -19,7 +19,7 @@ def mine_bug_fixing_commits_api(project_url, output_dir, github_token):
     repo_owner, repo_name = owner_repo[0], owner_repo[1]
 
     headers = {
-        "Authorization": f"token {github_token}",
+        "Authorization": f"token {GITHUB_TOKEN}",
         "Accept": "application/vnd.github.v3+json"
     }
 
@@ -33,7 +33,7 @@ def mine_bug_fixing_commits_api(project_url, output_dir, github_token):
         save_bug_data(output_dir, repo_name, True, bug_fixing_commits, issues)
     else:
         print(f"No GitHub issues found for {repo_name}. Attempting to fetch Jira issues.")
-        fetch_issues_from_jira(output_dir)
+        fetch_issues_from_jira(project_url,output_dir)
 
 
 def fetch_commits_from_github(repo_owner, repo_name, headers, issues):
@@ -58,70 +58,62 @@ def fetch_commits_from_github(repo_owner, repo_name, headers, issues):
     return bug_fixing_commits
 
 
-def fetch_issues_from_jira(project_file, output_dir):
+def fetch_issues_from_jira(project_url, output_dir):
     """
-    Fetch all bug-fixing issues from Jira for each project listed in the provided file.
+    Fetch all bug-fixing issues from Jira for a single project URL.
     
     Parameters:
-    - project_file (str): Path to the text file containing GitHub project URLs.
+    - project_url (str): The project URL.
     - output_dir (str): Directory where JSON files with issue data will be saved.
     """
-    # Read all project URLs from the file
-    with open(project_file, 'r') as f:
-        project_urls = [line.strip() for line in f if line.strip()]
+    # Extract the project key (last part of the URL)
+    project_key = project_url.rstrip('/').split('/')[-1]
+    print(f"Processing project: {project_key}")
 
-    for project_url in project_urls:
-        # Extract the project key (last part of the URL)
-        project_key = project_url.rstrip('/').split('/')[-1]
-        print(f"Processing project: {project_key}")
+    # Set up directory and file paths for the project
+    project_folder = os.path.join(output_dir, project_key)
+    os.makedirs(project_folder, exist_ok=True)
+    output_file = os.path.join(project_folder, "bug_fixes.json")
 
-        # Set up directory and file paths for each project
-        project_folder = os.path.join(output_dir, project_key)
-        os.makedirs(project_folder, exist_ok=True)
-        output_file = os.path.join(project_folder, "bug_fixes.json")
+    project_data = {"using_github_issues": False, "bug_fixing_commits": [], "issue_data": []}
+    start_at = 0
+    page_size = 50  # Define page size for Jira API pagination
 
-        project_data = {"using_github_issues": False, "bug_fixing_commits": [], "issue_data": []}
-        start_at = 0
-        page_size = 50  # Define page size for Jira API pagination
+    while True:
+        # Set up parameters for the paginated issue search
+        params = {
+            "jql": f"project = '{project_key}' AND issuetype = Bug AND status in (Closed, Resolved)",
+            "startAt": start_at,
+            "maxResults": page_size
+        }
 
-        while True:
-            # Set up parameters for the paginated issue search
-            params = {
-                "jql": f"project = '{project_key}' AND issuetype = Bug AND status in (Closed, Resolved)",
-                "startAt": start_at,
-                "maxResults": page_size
-            }
+        response = requests.get(jira_issues_url, params=params)
+        if response.status_code == 200:
+            issues = response.json().get("issues", [])
+            for issue in issues:
+                issue_data = {
+                    "project_key": project_key,
+                    "issue_number": issue["id"],
+                    "title": issue["fields"]["summary"],
+                    "body": issue["fields"].get("description", ""),
+                    "state": issue["fields"]["status"]["name"].lower()
+                }
+                project_data["issue_data"].append(issue_data)
 
-            response = requests.get(jira_issues_url, params=params)
-            if response.status_code == 200:
-                issues = response.json().get("issues", [])
-                for issue in issues:
-                    issue_data = {
-                        "project_key": project_key,
-                        "issue_number": issue["id"],
-                        "title": issue["fields"]["summary"],
-                        "body": issue["fields"].get("description", ""),
-                        "state": issue["fields"]["status"]["name"].lower()
-                    }
-                    project_data["issue_data"].append(issue_data)
+            # Update start_at for the next page
+            start_at += page_size
 
-                # Update start_at for the next page
-                start_at += page_size
-
-                # Exit loop if no more issues are available
-                if len(issues) < page_size:
-                    break
-            else:
-                print(f"Failed to retrieve issues for project {project_key}. Status code: {response.status_code}")
+            # Exit loop if no more issues are available
+            if len(issues) < page_size:
                 break
+        else:
+            print(f"Failed to retrieve issues for project {project_key}. Status code: {response.status_code}")
+            break
 
-            # Write the project data to a JSON file
-            with open(output_file, "w") as f:
-                json.dump(project_data, f, indent=4)
-            print(f"Jira data for project {project_key} written to {output_file}")
-
-    else:
-        print(f"Failed to retrieve Jira projects. Status code: {response.status_code}")
+        # Write the project data to a JSON file
+        with open(output_file, "w") as f:
+            json.dump(project_data, f, indent=4)
+        print(f"Jira data for project {project_key} written to {output_file}")
 
 
 
@@ -153,7 +145,7 @@ def save_bug_data(output_dir, repo_name, using_github_issues, bug_fixing_commits
     print(f"Bug-fixing data saved to {output_file}")
 
 
-def mine_multiple_projects_from_file(sources_file, output_dir, github_token):
+def mine_multiple_projects_from_file(sources_file, output_dir):
     """
     Mine bug-fixing commits for multiple projects using GitHub, falling back to Jira if needed.
     """
@@ -162,14 +154,14 @@ def mine_multiple_projects_from_file(sources_file, output_dir, github_token):
 
     for url in project_urls:
         try:
-            mine_bug_fixing_commits_api(url, output_dir, github_token)
+            mine_bug_fixing_commits_api(url, output_dir)
             sleep(0.5)  # Respect GitHub API rate limits
         except Exception as exc:
             print(f"Failed processing {url} due to {exc}")
 
 
-# Example usage:
-sources_file = "sources.txt"
-output_dir = "Outputs"
-github_token = "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"
-mine_multiple_projects_from_file(sources_file, output_dir, github_token)
+if __name__ == "__main__":
+    # Example usage:
+    sources_file = "sources.txt"
+    output_dir = "Outputs"
+    mine_multiple_projects_from_file(sources_file, output_dir)
