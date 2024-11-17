@@ -5,7 +5,9 @@ import subprocess
 from zipfile import ZipFile, ZIP_DEFLATED
 
 
+# For Linux project root installation of RefactoringMiner
 miner_dir = os.path.join("RefactoringMiner-3.0.9", "bin", "RefactoringMiner")
+
 
 
 def mine_refactoring_activity(project_dir, output_dir):
@@ -20,6 +22,7 @@ def mine_refactoring_activity(project_dir, output_dir):
     json_output = os.path.join(output_dir, "rminer_output.json")
     csv_output = os.path.join(output_dir, "rminer_analysis.csv")
     zip_output = os.path.join(output_dir, "rminer_output.zip")
+    error_output = os.path.join(output_dir, "error_output.txt")
     
     
     # Mining the repository
@@ -31,14 +34,24 @@ def mine_refactoring_activity(project_dir, output_dir):
             subprocess.run([miner_dir, "-a", project_dir, "-json", json_output])
     except subprocess.CalledProcessError as e:
         print(f"Error while mining {e}")
+        with open(error_output, 'w') as file:
+            file.write("The mining process encountered an error.")
         raise
     
-
-    # Collecting statistics from the data
-    with open(json_output, 'r') as json_data:
-        miner_output = json.load(json_data)
     
+    # Opening the mined data
+    try:
+        with open(json_output, 'r') as json_data:
+            miner_output = json.load(json_data)
+    except:
+        print(f"Error while opening the json file.")
+        with open(error_output, 'w') as file:
+            file.write("The JSON file cannot be read.")
+        create_zip(zip_output, json_output) # Zipping the output to save space even though the file has issues
+        raise
 
+
+    # Calculating statistics from the data
     for commit in miner_output['commits']:
         commits_all += 1
         if commit['refactorings']:
@@ -50,8 +63,9 @@ def mine_refactoring_activity(project_dir, output_dir):
                     refactoring_data[refactor['type']] += 1
                 refactoring_data['Total Refactorings'] += 1
     
-    refactoring_data['Average Number of Commits Between Refactorings'] = commits_all / commits_refactoring
-    refactoring_data['Average Refactors per Refactoring Commit'] = refactoring_data['Total Refactorings'] / commits_refactoring
+    if commits_refactoring != 0:
+        refactoring_data['Average Number of Commits Between Refactorings'] = commits_all / commits_refactoring
+        refactoring_data['Average Refactors per Refactoring Commit'] = refactoring_data['Total Refactorings'] / commits_refactoring
 
 
     # Saving the statistics to a .csv file
@@ -61,9 +75,12 @@ def mine_refactoring_activity(project_dir, output_dir):
         for key in refactoring_data:
             csvwriter.writerow([key, refactoring_data[key]])
 
+    create_zip(zip_output, json_output)
+    
 
-    # Compressing the RMiner output .json and deleting the .json to save space
-    with ZipFile(zip_output, 'w', ZIP_DEFLATED, compresslevel=9) as zip:
+# Compressing the RMiner output .json and deleting the .json to save space
+def create_zip(zip_output, json_output):
+    with ZipFile(zip_output, 'w', ZIP_DEFLATED) as zip:
         zip.write(json_output, "rminer_output.json")
 
     if os.path.exists(json_output):
@@ -72,10 +89,9 @@ def mine_refactoring_activity(project_dir, output_dir):
         print(f"{json_output} does not exist, could not delete the file.")
 
 
-
-
 if __name__ == "__main__":
-    # Code for testing purposes
-    project = os.path.join("repository")
-    output = os.path.join("Outputs", "ant")
-    mine_refactoring_activity(project, output)
+    # Code for testing purposes, requires both existing input repository folder and output folder
+    repository = os.path.join("repository")
+    output = os.path.join("Outputs", "outputdirectory")
+    mine_refactoring_activity(repository, output)
+
