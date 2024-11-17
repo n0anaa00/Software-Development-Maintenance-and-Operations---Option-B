@@ -4,6 +4,8 @@ RefactoringMiner==3.0.9
 
 requests==2.32.3
 
+scc==3.4.0 # Do not use pip install, that will install version 0.20.0
+
 
 ##############################################
 # RefactoringMiner setup instructions #

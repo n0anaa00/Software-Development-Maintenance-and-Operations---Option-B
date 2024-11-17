@@ -47,7 +47,7 @@ def main():
             clone_repository(project_url, project_dir)
 
             # Perform analysis tasks
-            mine_refactoring_activity(project_dir, output_dir)
+            #mine_refactoring_activity(project_dir, output_dir)
             calculate_and_collect_diff(project_dir, output_dir)
             collect_developers_effort(project_dir, output_dir)
             mine_bug_fixing_commits_api(project_url, output_dir)

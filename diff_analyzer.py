@@ -3,7 +3,8 @@ import os
 import json
 import requests
 
-def calculate_and_collect_diff(repository_path, output_file, repo_type="github", jira_base_url=None, project_key=None, auth_token=None):
+def calculate_and_collect_diff(repository_path, project_output_dir, repo_type="github", jira_base_url=None, project_key=None, auth_token=None):
+    print("Calculating and collecting diff...")
     """
     Analyzes the diff changes between each commit and its previous commit in a Git or Jira repository,
     and saves the output to a JSON file.
@@ -85,6 +86,7 @@ def calculate_and_collect_diff(repository_path, output_file, repo_type="github",
             print("Failed to fetch issues from Jira:", response.status_code, response.text)
 
     # Save the collected diffs to the specified output file
+    output_file = os.path.join(project_output_dir, 'diff_analysis.json')
     with open(output_file, 'w') as file:
         json.dump(diffs, file, indent=4, default=str)
     print(f"Diff data saved to {output_file}")

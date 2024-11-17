@@ -64,6 +64,9 @@ def collect_developers_effort(project_dir, output_dir):
     effort_data = [["refactoring_hash", "previous_hash", "TLOC"]]
  
     for i in range(1, len(commits)):
+        # Count progress:
+        print((i / len(commits)) * 100)
+        
         refactoring_commit = commits[i]
         previous_commit = commits[i - 1]
  
