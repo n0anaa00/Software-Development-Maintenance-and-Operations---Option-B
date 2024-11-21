@@ -21,3 +21,12 @@ scc==3.4.0 # Do not use pip install, that will install version 0.20.0
 #    If the path is too long, there may be issues with running the miner from the command line.
 # 3. Add C:\path-to\RefactoringMiner-3.0.9\bin to the system PATH variable.
 # 4. The miner should be ready to go. Make sure to restart any IDE or terminals in order for the changes to the PATH to take effect.
+
+#############################################
+
+# On windows you may need to run the following command to enable the processing of repos with long filenames:
+# git config --global core.longpaths true
+
+# If issues with long filepaths persist, go to regedit,
+# Navigate to HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem
+# Set LongPathsEnabled to 1

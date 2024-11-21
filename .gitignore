@@ -22,3 +22,6 @@ Thumbs.db
 
 # Ignore RefactoringMiner folder
 RefactoringMiner-3.0.9/*
+
+# Ignore verification outputs
+no_*
